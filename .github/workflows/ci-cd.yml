@@ -45,16 +45,19 @@ jobs:
       - name: Push Docker image
         run: docker push $IMAGE_NAME:latest
 
-  deploy-local:
+    deploy-local:
     needs: docker
-    runs-on: [self-hosted, linux]
+    runs-on: [self-hosted, windows]
+
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
       - name: Deploy latest image on local computer
+        shell: powershell
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
-          cd "$HOME/csi2113-task-manager"
-          export DOCKERHUB_USERNAME="$DOCKERHUB_USERNAME"
-          docker compose pull
-          docker compose up -d
-          docker image prune -f
+          docker pull "$env:DOCKERHUB_USERNAME/csi2113-task-manager:latest"
+          docker rm -f csi2113-task-manager 2>$null
+          docker run -d --name csi2113-task-manager -p 5000:5000 "$env:DOCKERHUB_USERNAME/csi2113-task-manager:latest"
