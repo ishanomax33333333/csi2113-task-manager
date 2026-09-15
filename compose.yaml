@@ -1,0 +1,12 @@
+services:
+  web:
+    image: ${DOCKERHUB_USERNAME}/csi2113-task-manager:latest
+    container_name: csi2113-task-manager
+    ports:
+      - "5000:5000"
+    volumes:
+      - task_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  task_data:

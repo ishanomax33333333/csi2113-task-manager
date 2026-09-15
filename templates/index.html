@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DevOps Task Manager</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; }
+    input, button { padding: 10px; font-size: 1rem; }
+    input { width: 65%; }
+    button { cursor: pointer; }
+    li { list-style: none; padding: 12px; margin: 8px 0; background: #f2f2f2; display: flex; justify-content: space-between; }
+    ul { padding: 0; }
+    .done { text-decoration: line-through; color: #777; }
+    #message { margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <h1>DevOps Task Manager</h1>
+  <p>Add, complete, and delete tasks.</p>
+  <form id="task-form">
+    <input id="title" placeholder="Enter a task" required maxlength="120">
+    <button type="submit">Add</button>
+  </form>
+  <p id="message"></p>
+  <ul id="tasks"></ul>
+
+<script>
+async function loadTasks() {
+  const response = await fetch("/api/tasks");
+  const tasks = await response.json();
+  const list = document.getElementById("tasks");
+  list.innerHTML = "";
+  tasks.forEach(task => {
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    span.textContent = task.title;
+    if (task.completed) span.className = "done";
+
+    const actions = document.createElement("span");
+    const complete = document.createElement("button");
+    complete.textContent = task.completed ? "Undo" : "Done";
+    complete.onclick = async () => {
+      await fetch(`/api/tasks/${task.id}`, {method: "PATCH"});
+      loadTasks();
+    };
+
+    const remove = document.createElement("button");
+    remove.textContent = "Delete";
+    remove.onclick = async () => {
+      await fetch(`/api/tasks/${task.id}`, {method: "DELETE"});
+      loadTasks();
+    };
+
+    actions.append(complete, " ", remove);
+    li.append(span, actions);
+    list.appendChild(li);
+  });
+}
+
+document.getElementById("task-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const input = document.getElementById("title");
+  const response = await fetch("/api/tasks", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({title: input.value})
+  });
+  document.getElementById("message").textContent =
+    response.ok ? "Task added successfully." : "Could not add task.";
+  input.value = "";
+  loadTasks();
+});
+
+loadTasks();
+</script>
+</body>
+</html>
