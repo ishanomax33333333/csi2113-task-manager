@@ -46,8 +46,8 @@ jobs:
         run: docker push $IMAGE_NAME:latest
 
     deploy-local:
-    needs: docker
-    runs-on: [self-hosted, windows]
+      needs: docker
+      runs-on: [self-hosted, windows]
 
     steps:
       - name: Checkout source
