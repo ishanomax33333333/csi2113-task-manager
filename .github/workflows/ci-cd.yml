@@ -2,7 +2,7 @@ name: CSI2113 CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 env:
@@ -11,6 +11,7 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -29,6 +30,7 @@ jobs:
   docker:
     needs: test
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -45,9 +47,9 @@ jobs:
       - name: Push Docker image
         run: docker push $IMAGE_NAME:latest
 
-    deploy-local:
-      needs: docker
-      runs-on: [self-hosted, windows]
+  deploy-local:
+    needs: docker
+    runs-on: [self-hosted, windows]
 
     steps:
       - name: Checkout source
